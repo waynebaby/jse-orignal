@@ -1,0 +1,23 @@
+[package]
+name = "jse"
+version = "0.1.0"
+edition = "2021"
+description = "JSE (JSON Structural Expression) interpreter for Rust"
+license = "MIT"
+repository = "https://github.com/MarchLiu/jse"
+documentation = "https://docs.rs/jse"
+homepage = "https://github.com/MarchLiu/jse"
+keywords = ["jse", "json", "s-expression", "interpreter"]
+categories = ["data-structures", "parser-implementations"]
+authors = ["marsliu <mars.liu@outlook.com>"]
+readme = "README.md"
+rust-version = "1.70"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+regex = "1.10"
+thiserror = "1.0"
+
+[dev-dependencies]
+serde_json = "1.0"

@@ -1,0 +1,40 @@
+use jse::{Engine, ExpressionEnv, QUERY_FIELDS};
+use serde_json::json;
+
+#[test]
+fn basic_query() {
+    let query = json!({
+        "$expr": ["$pattern", "$*", "author of", "$*"]
+    });
+    let result = Engine::new(ExpressionEnv).execute(&query).unwrap();
+    let sql = result.as_str().unwrap();
+    assert!(sql.contains("select"));
+    assert!(sql.contains("subject, predicate, object, meta"));
+    assert!(sql.contains("from statement as s"));
+    assert!(sql.contains("author of"));
+    assert!(sql.contains("triple"));
+    assert!(sql.contains("offset 0"));
+    assert!(sql.contains("limit 100"));
+}
+
+#[test]
+fn combined_query() {
+    let query = json!({
+        "$query": [
+            "$and",
+            [
+                ["$pattern", "Liu Xin", "author of", "$*"],
+                ["$pattern", "$*", "author of", "$*"]
+            ]
+        ]
+    });
+    let result = Engine::new(ExpressionEnv).execute(&query).unwrap();
+    let sql = result.as_str().unwrap();
+    assert!(sql.contains(&format!("select {}", QUERY_FIELDS)));
+    assert!(sql.contains("from statement"));
+    assert!(sql.contains("Liu Xin"));
+    assert!(sql.contains("author of"));
+    assert!(sql.contains(" and "));
+    assert!(sql.contains("offset 0"));
+    assert!(sql.contains("limit 100"));
+}
