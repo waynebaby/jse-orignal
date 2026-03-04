@@ -182,18 +182,58 @@ JSE：
 
 ## 使用方法
 
-后续将提供：
+### 安装
 
-* Python 示例
-* TypeScript 示例
-* 简单解释器实现
-* JSON Schema 示例
+当前提供多语言实现：
 
-用于演示：
+- **Python**：`pyjse`
+- **TypeScript/JavaScript**：`jse-engine`
+- **Java**：`jse4j`
 
-* 结构解析
-* 表达式解释
-* DSL 扩展
+#### Python（PyPI）
+
+```bash
+pip install pyjse
+```
+
+#### TypeScript/JavaScript（npm）
+
+```bash
+npm install jse-engine
+```
+
+#### Java（Maven Central）
+
+Maven:
+
+```xml
+<dependency>
+  <groupId>io.github.marchliu</groupId>
+  <artifactId>jse4j</artifactId>
+  <version>0.1.0</version>
+</dependency>
+```
+
+Gradle Groovy:
+
+```groovy
+implementation 'io.github.marchliu:jse4j:0.1.0'
+```
+
+Gradle Kotlin:
+
+```kotlin
+implementation("io.github.marchliu:jse4j:0.1.0")
+```
+
+### 示例与实现
+
+仓库中包含：
+
+* Python 示例与解释器：`python/pyjse`
+* TypeScript 示例与解释器：`typescript/`
+* Java 示例与解释器：`java/`
+* 后续还可以补充 JSON Schema 与更复杂的 DSL 示例
 
 ---
 
