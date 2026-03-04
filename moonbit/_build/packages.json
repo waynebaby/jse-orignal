@@ -1,12 +1,12 @@
 {
   "source_dir": "/Users/mars/jobs/jse/moonbit",
-  "name": "marchliu/jse",
+  "name": "MarchLiu/jse",
   "packages": [
     {
       "is-main": false,
       "is-third-party": false,
       "root-path": "/Users/mars/jobs/jse/moonbit/src/jse",
-      "root": "marchliu/jse",
+      "root": "MarchLiu/jse",
       "rel": "jse",
       "files": {
         "/Users/mars/jobs/jse/moonbit/src/jse/engine.mbt": {

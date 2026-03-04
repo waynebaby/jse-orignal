@@ -1,7 +1,7 @@
 {
   "packages": [
     {
-      "root": "marchliu/jse",
+      "root": "MarchLiu/jse",
       "rel": "jse",
       "artifact": "/Users/mars/jobs/jse/moonbit/_build/wasm-gc/release/check/jse/jse.mi"
     },
