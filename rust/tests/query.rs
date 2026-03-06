@@ -1,12 +1,16 @@
 use jse::{Engine, ExpressionEnv, QUERY_FIELDS};
 use serde_json::json;
 
+fn engine() -> Engine<ExpressionEnv> {
+    Engine::new(ExpressionEnv::new())
+}
+
 #[test]
 fn basic_query() {
     let query = json!({
-        "$expr": ["$pattern", "$*", "author of", "$*"]
+        "$expr": ["$pattern", "*", "author of", "*"]
     });
-    let result = Engine::new(ExpressionEnv).execute(&query).unwrap();
+    let result = engine().execute(&query).unwrap();
     let sql = result.as_str().unwrap();
     assert!(sql.contains("select"));
     assert!(sql.contains("subject, predicate, object, meta"));
@@ -23,12 +27,12 @@ fn combined_query() {
         "$query": [
             "$and",
             [
-                ["$pattern", "Liu Xin", "author of", "$*"],
-                ["$pattern", "$*", "author of", "$*"]
+                ["$pattern", "Liu Xin", "author of", "*"],
+                ["$pattern", "*", "author of", "*"]
             ]
         ]
     });
-    let result = Engine::new(ExpressionEnv).execute(&query).unwrap();
+    let result = engine().execute(&query).unwrap();
     let sql = result.as_str().unwrap();
     assert!(sql.contains(&format!("select {}", QUERY_FIELDS)));
     assert!(sql.contains("from statement"));

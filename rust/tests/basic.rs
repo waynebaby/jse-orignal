@@ -2,7 +2,7 @@ use jse::{Engine, ExpressionEnv};
 use serde_json::json;
 
 fn engine() -> Engine<ExpressionEnv> {
-    Engine::new(ExpressionEnv)
+    Engine::new(ExpressionEnv::new())
 }
 
 #[test]

@@ -3,7 +3,7 @@ pub const QUERY_FIELDS: &str = "subject, predicate, object, meta";
 
 /// Convert $pattern arguments to PostgreSQL jsonb containment triple.
 pub fn pattern_to_triple(subject: &str, predicate: &str, object: &str) -> Vec<String> {
-    if subject == "$*" && object == "$*" {
+    if subject == "*" && object == "*" {
         return vec![predicate.to_string()];
     }
     vec![

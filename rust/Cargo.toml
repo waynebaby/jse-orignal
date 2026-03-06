@@ -1,8 +1,8 @@
 [package]
 name = "jse"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
-description = "JSE (JSON Structural Expression) interpreter for Rust"
+description = "JSE (JSON Structural Expression) interpreter for Rust - AST-based architecture"
 license = "MIT"
 repository = "https://github.com/MarchLiu/jse"
 documentation = "https://docs.rs/jse"
