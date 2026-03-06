@@ -1,8 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { Engine, ExpressionEnv } from "../index.js";
+import { Engine, Env, UTILS_FUNCTORS, SQL_FUNCTORS } from "../index.js";
 
 function createEngine() {
-  return new Engine(new ExpressionEnv());
+  const env = new Env();
+  env.load(UTILS_FUNCTORS, SQL_FUNCTORS);
+  return new Engine(env);
 }
 
 describe("query expressions", () => {

@@ -10,7 +10,10 @@
       "Bash(xargs:*)",
       "Bash(find:*)",
       "Bash(python -c:*)",
-      "Bash(python3 -c:*)"
+      "Bash(python3 -c:*)",
+      "Bash(cat:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm test:*)"
     ]
   }
 }
