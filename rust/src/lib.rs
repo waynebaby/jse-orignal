@@ -9,9 +9,15 @@ pub mod functors;
 pub mod sql;
 
 pub use engine::{Engine, AsEnv, JseError};
-pub use env::{Env, ExpressionEnv, Functor, EnvTrait};
+pub use env::{Env, Functor};
 pub use serde_json::Value as JseValue;
 pub use sql::{pattern_to_triple, triple_to_sql_condition, QUERY_FIELDS};
 
 // Re-export commonly used AST types
 pub use ast::{AstError, Parser, AstNode};
+
+// Re-export functor module functions for easy loading
+pub use functors::builtin::builtin_functors;
+pub use functors::lisp::lisp_functors;
+pub use functors::utils::utils_functors;
+pub use functors::sql::sql_functors;

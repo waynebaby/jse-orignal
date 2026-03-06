@@ -1,6 +1,11 @@
 //! LISP-enhanced functors for JSE.
 //!
 //! Following Python's functors/lisp.py pattern:
+//! - $apply: Apply functor to argument list
+//! - $eval: Evaluate expression
+//! - $lambda: Create lambda function with closure
+//! - $def: Define symbol in current environment
+//! - $defn: Define named function (def + lambda syntax sugar)
 
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -29,10 +34,13 @@ pub fn eval_expr(env: &Rc<RefCell<Env>>, args: &[Value]) -> Result<Value, AstErr
         return Ok(Value::Null);
     }
 
-    // Re-parse the argument and evaluate
+    // Re-parse the argument and evaluate using env.eval()
+    // This follows the Python pattern: env.eval() -> ast.apply()
     let parser = Parser::new(Rc::clone(env));
     let ast = parser.parse(&args[0])?;
-    ast.apply(env)
+
+    // Use env.eval() to delegate to ast.apply()
+    env.borrow().eval(ast.as_ref(), env)
 }
 
 pub fn lambda(env: &Rc<RefCell<Env>>, args: &[Value]) -> Result<Value, AstError> {
@@ -56,7 +64,7 @@ pub fn lambda(env: &Rc<RefCell<Env>>, args: &[Value]) -> Result<Value, AstError>
     let body = args[1].clone();
 
     // Store lambda as a special object that can be called
-    // For now, return a placeholder
+    // The closure environment is captured at definition time (static scoping)
     let mut lambda_obj = serde_json::Map::new();
     lambda_obj.insert("__lambda__".to_string(), Value::Bool(true));
     lambda_obj.insert("params".to_string(), Value::Array(

@@ -1,8 +1,8 @@
-use jse::{Engine, ExpressionEnv};
+use jse::Engine;
 use serde_json::json;
 
-fn engine() -> Engine<ExpressionEnv> {
-    Engine::new(ExpressionEnv::new())
+fn engine() -> Engine {
+    Engine::with_default_env()
 }
 
 #[test]

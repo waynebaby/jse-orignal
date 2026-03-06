@@ -1,8 +1,14 @@
-use jse::{Engine, ExpressionEnv, QUERY_FIELDS};
+use jse::{Engine, Env, QUERY_FIELDS, builtin_functors, utils_functors, sql_functors};
 use serde_json::json;
+use std::rc::Rc;
+use std::cell::RefCell;
 
-fn engine() -> Engine<ExpressionEnv> {
-    Engine::new(ExpressionEnv::new())
+fn engine() -> Engine {
+    let env = Rc::new(RefCell::new(Env::new()));
+    env.borrow_mut().load(&builtin_functors());
+    env.borrow_mut().load(&utils_functors());
+    env.borrow_mut().load(&sql_functors());
+    Engine::new(env)
 }
 
 #[test]

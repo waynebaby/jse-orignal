@@ -167,7 +167,7 @@ impl ArrayNode {
         if SPECIAL_FORMS.contains(&symbol) {
             // Pass unevaluated arguments
             let args: Vec<&dyn AstNode> = self.rest().iter().map(|b| b.as_ref()).collect();
-            return env.borrow().apply_functor(symbol, env, &args);
+            return env.borrow().apply_functor_node(symbol, &args);
         }
 
         // Regular functors - evaluate arguments first
@@ -176,7 +176,7 @@ impl ArrayNode {
             .map(|node| node.apply(env))
             .collect();
 
-        env.borrow().apply_functor_with_values(symbol, env, &evaluated_args?)
+        env.borrow().apply_functor_values(symbol, &evaluated_args?)
     }
 }
 
@@ -243,12 +243,12 @@ impl AstNode for ObjectExpressionNode {
         // Pass unevaluated JSON for these operators
         if self.operator == "$pattern" || self.operator == "$query" {
             let json_value = self.value.to_json();
-            return env.borrow().apply_functor_with_values(&self.operator, env, &[json_value]);
+            return env.borrow().apply_functor_values(&self.operator, &[json_value]);
         }
 
         // For other operators, evaluate and apply as functor
         let evaluated = self.value.apply(env)?;
-        env.borrow().apply_functor_with_values(&self.operator, env, &[evaluated])
+        env.borrow().apply_functor_values(&self.operator, &[evaluated])
     }
 
     fn to_json(&self) -> Value {

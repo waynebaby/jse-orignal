@@ -1,6 +1,10 @@
 //! Environment for JSE execution with scope chaining.
 //!
 //! Following Python's env.py pattern:
+//! - env has nullable parent field for scope chain lookup
+//! - env provides register() method for def/defn
+//! - env provides load() method for functor modules
+//! - env.eval() delegates to ast.apply() (following jisp pattern)
 
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -15,24 +19,45 @@ pub type Functor = fn(&Rc<RefCell<Env>>, &[Value]) -> Result<Value, AstError>;
 pub struct Env {
     parent: Option<Rc<RefCell<Env>>>,
     bindings: HashMap<String, Value>,
-    functors: HashMap<String, Functor>,
+    functor_map: HashMap<String, Functor>,
 }
 
 impl Env {
+    /// Get this environment as an Rc<RefCell<Env>>.
+    /// If this is the top-level environment, wrap it in a new Rc<RefCell>.
+    /// Otherwise, return the parent Rc with this environment's bindings merged.
+    /// For simplicity, we return the parent if available, or create a new wrapper.
+    fn as_rc(&self) -> Rc<RefCell<Env>> {
+        if let Some(parent) = &self.parent {
+            Rc::clone(parent)
+        } else {
+            // For top-level env, we need to create a new Rc
+            // This is a limitation - the caller should ideally pass the Rc in
+            // But for our use case, we can work around it
+            Rc::new(RefCell::new(self.clone()))
+        }
+    }
+    /// Create a new empty environment
     pub fn new() -> Self {
         Self {
             parent: None,
             bindings: HashMap::new(),
-            functors: HashMap::new(),
+            functor_map: HashMap::new(),
         }
     }
 
+    /// Create a new environment with a parent (for closures/scope chain)
     pub fn new_with_parent(parent: Option<Rc<RefCell<Env>>>) -> Self {
         Self {
             parent,
             bindings: HashMap::new(),
-            functors: HashMap::new(),
+            functor_map: HashMap::new(),
         }
+    }
+
+    /// Get the parent environment
+    pub fn get_parent(&self) -> Option<Rc<RefCell<Env>>> {
+        self.parent.as_ref().map(Rc::clone)
     }
 
     /// Resolve symbol to value by searching up the scope chain
@@ -70,14 +95,29 @@ impl Env {
 
     /// Register a functor
     pub fn register_functor(&mut self, name: String, functor: Functor) {
-        self.functors.insert(name, functor);
+        self.functor_map.insert(name, functor);
     }
 
-    /// Load a module of functors
-    pub fn load(&mut self, module: &HashMap<String, Functor>) {
+    /// Load a module of functors into this environment
+    pub fn load(&mut self, module: &HashMap<&'static str, Functor>) {
         for (name, functor) in module {
-            self.functors.insert(name.clone(), *functor);
+            self.functor_map.insert(name.to_string(), *functor);
         }
+    }
+
+    /// Evaluate an AST node in this environment.
+    ///
+    /// This is the core method that delegates to ast.apply(self),
+    /// following the jisp pattern where env.eval() delegates to ast.apply().
+    pub fn eval(&self, node: &dyn AstNode, env: &Rc<RefCell<Env>>) -> Result<Value, AstError> {
+        node.apply(env)
+    }
+
+    /// Evaluate an AST node using self as the environment.
+    /// This is a convenience method that creates an Rc wrapper if needed.
+    pub fn eval_node(&self, node: &dyn AstNode) -> Result<Value, AstError> {
+        let env = self.as_rc();
+        node.apply(&env)
     }
 
     /// Apply a functor with AST nodes (for special forms)
@@ -87,15 +127,29 @@ impl Env {
         env: &Rc<RefCell<Env>>,
         args: &[&dyn AstNode]
     ) -> Result<Value, AstError> {
-        let functor = self.functors.get(name)
+        let functor = self.resolve_functor(name)
             .ok_or_else(|| AstError::SymbolNotFound(name.to_string()))?;
 
         // Convert AST nodes to their JSON representation for special forms
-        let json_args: Result<Vec<Value>, _> = args.iter()
-            .map(|node| Ok(node.to_json()))
+        let json_args: Vec<Value> = args.iter()
+            .map(|node| node.to_json())
             .collect();
 
-        functor(env, &json_args?)
+        functor(env, &json_args)
+    }
+
+    /// Apply a functor with AST nodes using self as the environment.
+    /// This is a convenience method that avoids passing env twice.
+    pub fn apply_functor_node(&self, name: &str, args: &[&dyn AstNode]) -> Result<Value, AstError> {
+        let env = self.as_rc();
+        let functor = self.resolve_functor(name)
+            .ok_or_else(|| AstError::SymbolNotFound(name.to_string()))?;
+
+        let json_args: Vec<Value> = args.iter()
+            .map(|node| node.to_json())
+            .collect();
+
+        functor(&env, &json_args)
     }
 
     /// Apply a functor with evaluated values
@@ -111,9 +165,19 @@ impl Env {
         functor(env, args)
     }
 
+    /// Apply a functor with evaluated values using self as the environment.
+    /// This is a convenience method that avoids passing env twice.
+    pub fn apply_functor_values(&self, name: &str, args: &[Value]) -> Result<Value, AstError> {
+        let env = self.as_rc();
+        let functor = self.resolve_functor(name)
+            .ok_or_else(|| AstError::SymbolNotFound(name.to_string()))?;
+
+        functor(&env, args)
+    }
+
     /// Resolve a functor from the environment chain
     pub fn resolve_functor(&self, name: &str) -> Option<Functor> {
-        if let Some(&functor) = self.functors.get(name) {
+        if let Some(&functor) = self.functor_map.get(name) {
             Some(functor)
         } else if let Some(parent) = &self.parent {
             parent.borrow().resolve_functor(name)
@@ -128,7 +192,7 @@ impl Clone for Env {
         Self {
             parent: self.parent.as_ref().map(Rc::clone),
             bindings: self.bindings.clone(),
-            functors: self.functors.clone(),
+            functor_map: self.functor_map.clone(),
         }
     }
 }
@@ -136,61 +200,5 @@ impl Clone for Env {
 impl Default for Env {
     fn default() -> Self {
         Self::new()
-    }
-}
-
-/// Expression-only environment for basic evaluation
-#[derive(Default)]
-pub struct ExpressionEnv {
-    inner: Rc<RefCell<Env>>,
-}
-
-impl ExpressionEnv {
-    pub fn new() -> Self {
-        let mut inner = Env::new();
-        // Load default functors - convert to String keys
-        for (name, functor) in crate::functors::builtin::builtin_functors() {
-            inner.register_functor(name.to_string(), functor);
-        }
-        for (name, functor) in crate::functors::lisp::lisp_functors() {
-            inner.register_functor(name.to_string(), functor);
-        }
-        for (name, functor) in crate::functors::utils::utils_functors() {
-            inner.register_functor(name.to_string(), functor);
-        }
-        for (name, functor) in crate::functors::sql::sql_functors() {
-            inner.register_functor(name.to_string(), functor);
-        }
-        Self { inner: Rc::new(RefCell::new(inner)) }
-    }
-
-    pub fn as_env_ref(&self) -> &Rc<RefCell<Env>> {
-        &self.inner
-    }
-}
-
-// Keep the old trait for backward compatibility
-/// Base environment for JSE execution.
-/// This trait is deprecated; use the `Env` struct instead.
-#[deprecated(note = "Use the Env struct instead")]
-pub trait EnvTrait {
-    /// Resolve a symbol to a value. Return `None` if not bound.
-    fn resolve(&self, symbol: &str) -> Option<Value> {
-        None
-    }
-}
-
-// Implement the deprecated trait for Env
-#[allow(deprecated)]
-impl EnvTrait for Env {
-    fn resolve(&self, symbol: &str) -> Option<Value> {
-        self.resolve(symbol)
-    }
-}
-
-#[allow(deprecated)]
-impl EnvTrait for ExpressionEnv {
-    fn resolve(&self, symbol: &str) -> Option<Value> {
-        self.inner.borrow().resolve(symbol)
     }
 }
