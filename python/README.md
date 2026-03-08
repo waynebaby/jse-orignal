@@ -1,6 +1,6 @@
 # PyJSE
 
-JSE (JSON Structural Expression) 的 Python 实现，可发布至 PyPI。
+JSE (JSON Structural Expression)  Python Edition
 
 ## 安装
 

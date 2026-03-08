@@ -3,13 +3,23 @@
 Migrated from the original engine.py implementation:
 - $pattern: Generate SQL for triple pattern matching
 - $query: Generate SQL for multi-pattern queries
-- $expr: Expression evaluation pass-through
 """
 
-import json
-import re
+
 from typing import Callable, TYPE_CHECKING
 from pyjse.types import JseValue
+import json
+from pyjse.ast.nodes import SymbolNode
+from pyjse.env import Env
+from pyjse.ast.parser import Parser
+
+class PatternNode(SymbolNode):
+    """Pattern node for SQL query.
+    """
+    def __init__(self, name: str, env: 'Env') -> None:
+        super().__init__(name, env)
+        self._name = name
+        self._env = env
 
 QUERY_FIELDS = "subject, predicate, object, meta"
 
@@ -20,44 +30,15 @@ if TYPE_CHECKING:
 # Type alias for functors
 Functor = Callable[['Env', ...], JseValue]
 
-
-def pattern_to_triple(subject: str, predicate: str, obj: str) -> list:
-    """Convert pattern arguments to triple, excluding '*' wildcards.
-
-    Examples:
-        - ["*", "author of", "*"] -> ["author of"]
-        - ["Liu Xin", "author of", "*"] -> ["Liu Xin", "author of", "*"]
-
-    Args:
-        subject: Subject pattern
-        predicate: Predicate pattern
-        obj: Object pattern
-
-    Returns:
-        List with non-wildcard elements
+def pattern_to_triple(subject: str, predicate: str, object: str) -> list[str]:
+    """Generate triple for a pattern.
     """
-    pattern = []
-    if subject != "*":
-        pattern.append(subject)
-    if predicate != "*":
-        pattern.append(predicate)
-    if obj != "*":
-        pattern.append(obj)
-    return pattern
+    return [subject, predicate, object]
 
-
-def triple_to_sql_condition(triple: list) -> str:
-    """Build SQL WHERE clause for triple pattern using jsonb containment.
-
-    Args:
-        triple: List representing triple pattern
-
-    Returns:
-        SQL WHERE condition string
+def triple_to_sql_condition(triple: list[str]) -> str:
+    """Generate SQL condition for a triple pattern.
     """
-    json_str = json.dumps({"triple": triple})
-    escaped = json_str.replace("'", "''")
-    return f"meta @> '{escaped}'"
+    return "meta @> '" + json.dumps({"triple": triple}) + "'"
 
 
 def _pattern(env: 'Env', *args: JseValue) -> JseValue:
@@ -82,12 +63,8 @@ def _pattern(env: 'Env', *args: JseValue) -> JseValue:
     pred = env.eval(args[1]) if hasattr(env, 'eval') else args[1]
     obj = env.eval(args[2]) if hasattr(env, 'eval') else args[2]
 
-    if (
-        not isinstance(subj, str) or
-        not isinstance(pred, str) or
-        not isinstance(obj, str)
-    ):
-        raise ValueError("$pattern requires string arguments")
+    if all(x == "*" for x in (subj, pred, obj)):
+        raise ValueError("subject, predicate, and object must not be all '*'")
 
     triple = pattern_to_triple(subj, pred, obj)
     cond = triple_to_sql_condition(triple)
@@ -97,34 +74,27 @@ def _pattern(env: 'Env', *args: JseValue) -> JseValue:
         f"from statement as s \nwhere {cond} \noffset 0\nlimit 100 \n"
     )
 
-
-def _expr(env: 'Env', *args: JseValue) -> JseValue:
-    """Expression evaluation pass-through.
-
-    Form: [$expr, expression] or {$expr: expression}
-    Evaluates the expression and returns the result.
-
-    Args:
-        env: Environment
-        *args: Expression to evaluate
-
-    Returns:
-        Evaluated expression result
+def _and(env: 'Env', *args: JseValue) -> JseValue:
+    """Generate SQL for AND query.
     """
-    if not args:
-        return None
-    return env.eval(args[0]) if hasattr(env, 'eval') else args[0]
+    tokens = [env.eval(e) for e in args]
+    return " and ".join(tokens)
+
+def _wildcard(env: 'Env', *args: JseValue) -> JseValue:
+    """Generate SQL for wildcard query.
+    """
+    return "*"
 
 
 def _query(env: 'Env', *args: JseValue) -> JseValue:
     """Generate SQL for multi-pattern query.
 
-    Form: [$query, op, patterns]
-    where patterns is a list of SQL strings from $pattern
+    Form: [$query, condition]
+    where condition is a AST quote
 
     Args:
         env: Environment
-        *args: (operator, patterns_array)
+        *args: query condition expression
 
     Returns:
         Combined SQL query string
@@ -132,34 +102,21 @@ def _query(env: 'Env', *args: JseValue) -> JseValue:
     Raises:
         ValueError: If wrong arguments or invalid patterns
     """
-    if len(args) < 2:
-        raise ValueError("$query expects [op, patterns array]")
-
     # First arg is operator (currently ignored, assumes "and")
-    op = env.eval(args[0]) if hasattr(env, 'eval') else args[0]
-    patterns = env.eval(args[1]) if hasattr(env, 'eval') else args[1]
+    local = Env(env)
+    local.load({
+            "$pattern": _pattern,
+            "$and": _and,
+            "$*": _wildcard,
+        })
+    parser = Parser(local)
+    condition = parser.parse(args)
+    where = condition.apply(local)
 
-    if not isinstance(patterns, list):
-        raise ValueError("$query second argument must be a list")
-
-    conditions = []
-    for sql in patterns:
-        if not isinstance(sql, str):
-            raise ValueError("Pattern must evaluate to SQL string")
-        # Extract WHERE clause from SQL
-        match = re.search(r"where\s+(.+?)\s+offset", sql, re.IGNORECASE)
-        if match:
-            conditions.append(f"({match.group(1).strip()})")
-        else:
-            conditions.append(sql)
-
-    where_clause = " and \n    ".join(conditions)
-    return f"select {QUERY_FIELDS} \nfrom statement \nwhere \n    {where_clause} \noffset 0\nlimit 100 \n"
-
+    sql = f"select {QUERY_FIELDS} \nfrom statement \nwhere \n    {where} \n"
+    return sql
 
 # Dict of all SQL functors for registration
 SQL_FUNCTORS: dict[str, Functor] = {
-    "$pattern": _pattern,
-    "$expr": _expr,
     "$query": _query,
 }

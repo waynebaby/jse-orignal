@@ -15,7 +15,7 @@ def engine():
 
 def test_basic_query(engine):
     query = {
-        "$expr": ["$pattern", "$*", "author of", "$*"],
+        "$query": {"$quote": ["$pattern", "$*", "author of", "$*"]},
     }
 
     result = engine.execute(query)
@@ -31,13 +31,13 @@ def test_basic_query(engine):
 
 def test_combined_query(engine):
     query = {
-        "$query": [
-            "$and",
-            [
-                ["$pattern", "Liu Xin", "author of", "$*"],
-                ["$pattern", "$*", "author of", "$*"],
+        "$query": {
+            "$quote": [
+                "$and",
+                    ["$pattern", "Liu Xin", "author of", "$*"],
+                    ["$pattern", "$*", "author of", "$*"],
             ],
-        ],
+        }
     }
 
     result = engine.execute(query)

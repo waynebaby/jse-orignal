@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pyjse"
-version = "0.2.0"
+version = "0.2.1"
 description = "JSE (JSON Structural Expression) interpreter for Python"
 readme = "README.md"
 license = { text = "MIT" }
@@ -52,5 +52,6 @@ addopts = "-v"
 [dependency-groups]
 dev = [
     "build>=1.4.0",
+    "pytest>=9.0.2",
     "twine>=6.2.0",
 ]

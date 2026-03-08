@@ -475,6 +475,7 @@ dev = [
 [package.dev-dependencies]
 dev = [
     { name = "build" },
+    { name = "pytest" },
     { name = "twine" },
 ]
 
@@ -485,6 +486,7 @@ provides-extras = ["dev"]
 [package.metadata.requires-dev]
 dev = [
     { name = "build", specifier = ">=1.4.0" },
+    { name = "pytest", specifier = ">=9.0.2" },
     { name = "twine", specifier = ">=6.2.0" },
 ]
 

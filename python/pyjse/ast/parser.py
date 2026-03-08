@@ -12,7 +12,7 @@ from pyjse.ast.nodes import (
     SymbolNode,
     ArrayNode,
     ObjectNode,
-    ObjectExpressionNode,
+    ExpressionNode,
     QuoteNode,
     LiteralNode,
 )
@@ -87,7 +87,7 @@ class Parser:
             return LiteralNode(_unescape(expr), self._env)
 
         # Arrays - check for expression form
-        if isinstance(expr, list):
+        if isinstance(expr, list) or isinstance(expr, tuple):
             return self._parse_list(expr)
 
         # Objects - check for expression form
@@ -126,8 +126,8 @@ class Parser:
         # Check if this is a function call form
         if isinstance(first, str) and _is_symbol(first):
             # [symbol, args...] - function call
-            elements = [self.parse(e) for e in lst]
-            return ArrayNode(elements, self._env)
+            elements = [self.parse(e) for e in lst[1:]]
+            return ExpressionNode(first, elements, {}, self._env)
 
         # Regular array - evaluate all elements
         elements = [self.parse(e) for e in lst]
@@ -181,7 +181,7 @@ class Parser:
                     parsed_metadata = self.parse(v)
                     metadata[parsed_key] = parsed_metadata
 
-            return ObjectExpressionNode(operator, parsed_value, metadata, self._env)
+            return ExpressionNode(operator, parsed_value, metadata, self._env)
 
         # Multiple symbol keys - error per formal semantics
         raise ValueError("JSE structure error: object cannot have multiple operator keys")

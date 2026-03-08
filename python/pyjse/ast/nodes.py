@@ -90,24 +90,10 @@ class ArrayNode(AstNode):
             # Look up the functor
             functor = env.resolve(first._name)
             if functor is None:
-                raise NameError(f"Unknown operator: {first._name}")
+                print(f"Unknown operator: {first._name} in {env._bindings}")
+                raise NameError(f"Unknown operator: {first._name} in {env._bindings}")
 
-            # Special forms: don't evaluate all arguments
-            # $def, $defn, $lambda need unevaluated symbols/expressions
-            special_forms = ('$def', '$defn', '$lambda', '$quote')
-            if first._name in special_forms:
-                # Pass arguments unevaluated (functor will handle)
-                if callable(functor):
-                    return functor(env, *self._elements[1:])
-                return functor
-
-            # Regular functors: evaluate arguments first
-            evaluated_args = [env.eval(arg) for arg in self._elements[1:]]
-
-            # Call the functor
-            if callable(functor):
-                return functor(env, *evaluated_args)
-            return functor
+            return functor(env, *self._elements[1:])
 
         # Regular array - evaluate all elements
         return [env.eval(elem) for elem in self._elements]
@@ -130,8 +116,8 @@ class ObjectNode(AstNode):
         return {k: env.eval(v) for k, v in self._dict.items()}
 
 
-class ObjectExpressionNode(AstNode):
-    """Represents an object expression with operator key.
+class ExpressionNode(AstNode):
+    """Represents an expression with operator key.
 
     Form: {"$operator": value, "meta": ...}
     """
@@ -175,7 +161,9 @@ class ObjectExpressionNode(AstNode):
         # NOT as a function call (which ArrayNode.apply() would do)
         from .nodes import ArrayNode
 
-        if self._operator == "$expr":
+        if self._operator == "$quote":
+            return self._value
+        elif self._operator == "$expr":
             # $expr evaluates the whole expression and returns the result
             args = [env.eval(self._value)]
         elif isinstance(self._value, ArrayNode):
@@ -185,7 +173,7 @@ class ObjectExpressionNode(AstNode):
             args = [_deep_eval(env, elem) for elem in elements]
         else:
             # For other types, just evaluate normally
-            args = [env.eval(self._value)]
+            args = env.eval(self._value)
 
         # Call the functor
         if callable(functor):
