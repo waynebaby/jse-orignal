@@ -17,7 +17,6 @@ import java.util.Set;
  *   <li>A function call: {@code [operator, args...]}</li>
  *   <li>A regular array: {@code [elements...]}</li>
  * </ul>
- * </p>
  */
 public final class ArrayNode extends AstNode {
 

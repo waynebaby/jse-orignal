@@ -18,7 +18,6 @@ import java.util.Map;
  *   <li>$cond: Multi-way conditional</li>
  *   <li>$cons: Prepend element to list</li>
  * </ul>
- * </p>
  */
 public final class BuiltinFunctors {
 

@@ -20,7 +20,6 @@ import java.util.Map;
  *   <li>$apply: Apply functor to argument list</li>
  *   <li>$eval: Evaluate expression</li>
  * </ul>
- * </p>
  */
 public final class LispFunctors {
 

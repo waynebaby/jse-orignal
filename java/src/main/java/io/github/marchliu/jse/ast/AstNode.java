@@ -11,7 +11,6 @@ import io.github.marchliu.jse.JseValue;
  *   <li>Construct-time env ({@link #getEnv()}) - captured when node is created</li>
  *   <li>Call-time env (passed to {@link #apply(Env)}) - used during execution</li>
  * </ul>
- * </p>
  */
 public abstract class AstNode implements JseValue {
 

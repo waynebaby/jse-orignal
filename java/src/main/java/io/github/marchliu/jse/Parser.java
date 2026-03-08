@@ -16,7 +16,6 @@ import java.util.Map;
  *   <li>Arrays: parsed as ArrayNode, with special handling for {@code $quote}</li>
  *   <li>Objects: parsed as ObjectNode or ObjectExpressionNode</li>
  * </ul>
- * </p>
  */
 public class Parser {
 
@@ -76,7 +75,6 @@ public class Parser {
      *   <li>{@code [symbol, ...]} -> ArrayNode (function call)</li>
      *   <li>{@code [...]} -> ArrayNode (regular array)</li>
      * </ul>
-     * </p>
      */
     private Object parseList(List<?> list) {
         if (list.isEmpty()) {
@@ -117,7 +115,6 @@ public class Parser {
      *   <li>{@code {symbol: value}} -> ObjectExpressionNode (exactly one symbol key)</li>
      *   <li>{@code {...}} -> ObjectNode with regular keys</li>
      * </ul>
-     * </p>
      */
     private Object parseDict(Map<String, Object> dict) {
         // Find symbol keys
