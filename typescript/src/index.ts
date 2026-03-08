@@ -24,4 +24,4 @@ export { LISP_FUNCTORS } from "./functors/lisp.js";
 export { SQL_FUNCTORS } from "./functors/sql.js";
 
 // SQL exports
-export { patternToTriple, tripleToSqlCondition, QUERY_FIELDS } from "./sql.js";
+export { patternToTriple, tripleToSqlCondition, QUERY_FIELDS } from "./functors/sql.js";

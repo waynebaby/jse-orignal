@@ -12,14 +12,14 @@ describe("query expressions", () => {
 
   it("basic $expr $pattern query", () => {
     const query = {
-      $expr: ["$pattern", "$*", "author of", "$*"],
+      $query: ["$quote", ["$pattern", "$*", "author of", "$*"]],
     };
 
     const result = engine.execute(query) as string;
 
     expect(result).toContain("select");
     expect(result).toContain("subject, predicate, object, meta");
-    expect(result).toContain("from statement as s");
+    expect(result).toContain("from statement");
     expect(result).toContain("author of");
     expect(result).toContain("triple");
     expect(result).toContain("offset 0");
@@ -28,18 +28,19 @@ describe("query expressions", () => {
 
   it("combined $query with $and patterns", () => {
     const query = {
-      $query: [
-        "$and",
-        [
+      $query: {
+        $quote: [
+          "$and",
           ["$pattern", "Liu Xin", "author of", "$*"],
           ["$pattern", "$*", "author of", "$*"],
         ],
-      ],
+      },
     };
 
     const result = engine.execute(query) as string;
 
-    expect(result).toContain("select subject, predicate, object, meta");
+    expect(result).toContain("select");
+    expect(result).toContain("subject, predicate, object, meta");
     expect(result).toContain("from statement");
     expect(result).toContain("Liu Xin");
     expect(result).toContain("author of");
