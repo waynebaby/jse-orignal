@@ -209,3 +209,4 @@ __marimo__/
 moonbit/_build/
 .bloop/
 .claude/settings.local.json
+.metals/
