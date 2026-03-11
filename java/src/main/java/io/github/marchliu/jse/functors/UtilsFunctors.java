@@ -1,7 +1,7 @@
 package io.github.marchliu.jse.functors;
 
 import io.github.marchliu.jse.Functor;
-
+import io.github.marchliu.jse.FunctorBox;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -17,36 +17,36 @@ public final class UtilsFunctors {
     /**
      * Logical AND functor.
      */
-    public static final Functor AND = (env, args) -> {
+    public static final FunctorBox AND = FunctorBox.box((env, args) -> {
         for (Object arg : args) {
             if (!toBoolean(arg)) {
                 return false;
             }
         }
         return true;
-    };
+    });
 
     /**
      * Logical OR functor.
      */
-    public static final Functor OR = (env, args) -> {
+    public static final FunctorBox OR = FunctorBox.box((env, args) -> {
         for (Object arg : args) {
             if (toBoolean(arg)) {
                 return true;
             }
         }
         return false;
-    };
+    });
 
     /**
      * Logical NOT functor.
      */
-    public static final Functor NOT = (env, args) -> {
+    public static final FunctorBox NOT = FunctorBox.box((env, args) -> {
         if (args.length == 0) {
             return true;
         }
         return !toBoolean(args[0]);
-    };
+    });
 
     /**
      * Convert value to boolean.
@@ -61,7 +61,7 @@ public final class UtilsFunctors {
     /**
      * Dictionary of all utility functors for registration.
      */
-    public static final Map<String, Functor> UTILS_FUNCTORS;
+    public static final Map<String, FunctorBox> UTILS_FUNCTORS;
 
     static {
         UTILS_FUNCTORS = new LinkedHashMap<>();

@@ -1,3 +1,14 @@
+error id: file://<WORKSPACE>/java/src/main/java/io/github/marchliu/jse/functors/BuiltinFunctors.java:io/github/marchliu/jse/FunctorBox#functor#
+file://<WORKSPACE>/java/src/main/java/io/github/marchliu/jse/functors/BuiltinFunctors.java
+empty definition using pc, found symbol in pc: io/github/marchliu/jse/FunctorBox#functor#
+empty definition using semanticdb
+empty definition using fallback
+non-local guesses:
+
+offset: 3779
+uri: file://<WORKSPACE>/java/src/main/java/io/github/marchliu/jse/functors/BuiltinFunctors.java
+text:
+```scala
 package io.github.marchliu.jse.functors;
 
 import io.github.marchliu.jse.Functor;
@@ -125,13 +136,20 @@ public final class BuiltinFunctors {
     /**
      * Dictionary of all built-in functors for registration.
      */
-    public static final Map<String, Functor> BUILTIN_FUNCTORS;
+    public static final Map<String, ? extends Functor> BUILTIN_FUNCTORS;
 
     static {
         BUILTIN_FUNCTORS = new LinkedHashMap<>();
-        BUILTIN_FUNCTORS.put("$quote", QUOTE);
-        BUILTIN_FUNCTORS.put("$eq", EQ);
-        BUILTIN_FUNCTORS.put("$cond", COND);
-        BUILTIN_FUNCTORS.put("$cons", CONS);
+        BUILTIN_FUNCTORS.put("$quote", QUOTE.functo@@r());
+        BUILTIN_FUNCTORS.put("$eq", EQ.functor());
+        BUILTIN_FUNCTORS.put("$cond", COND.functor());
+        BUILTIN_FUNCTORS.put("$cons", CONS.functor());
     }
 }
+
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: io/github/marchliu/jse/FunctorBox#functor#

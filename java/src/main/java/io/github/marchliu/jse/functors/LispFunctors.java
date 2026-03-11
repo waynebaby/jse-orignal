@@ -2,7 +2,7 @@ package io.github.marchliu.jse.functors;
 
 import io.github.marchliu.jse.Functor;
 import io.github.marchliu.jse.ast.LambdaNode;
-
+import io.github.marchliu.jse.FunctorBox;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,7 +28,7 @@ public final class LispFunctors {
      * $lambda functor - Create lambda function with closure.
      * Captures current environment for static scoping.
      */
-    public static final Functor LAMBDA = (env, args) -> {
+    public static final FunctorBox LAMBDA = FunctorBox.box((env, args) -> {
         if (args.length < 2) {
             throw new IllegalArgumentException("$lambda requires (params, body) arguments");
         }
@@ -46,7 +46,7 @@ public final class LispFunctors {
 
         // Create lambda with current environment as closure (static scoping!)
         return new LambdaNode(paramNames, body, env);
-    };
+    });
 
     /**
      * Extract parameter names from potentially unevaluated expression.
@@ -76,7 +76,7 @@ public final class LispFunctors {
     /**
      * $def functor - Define a symbol in current environment.
      */
-    public static final Functor DEF = (env, args) -> {
+    public static final FunctorBox DEF = FunctorBox.box((env, args) -> {
         if (args.length != 2) {
             throw new IllegalArgumentException("$def requires (name, value) arguments");
         }
@@ -100,13 +100,13 @@ public final class LispFunctors {
 
         env.register(name, value);
         return value;
-    };
+    });
 
     /**
      * $defn functor - Define a named function.
      * Syntactic sugar for: [$def, name, [$lambda, params, body]]
      */
-    public static final Functor DEFN = (env, args) -> {
+    public static final FunctorBox DEFN = FunctorBox.box((env, args) -> {
         if (args.length < 3) {
             throw new IllegalArgumentException("$defn requires (name, params, body) arguments");
         }
@@ -132,12 +132,12 @@ public final class LispFunctors {
         // Register it
         env.register(name, lambdaFn);
         return lambdaFn;
-    };
+    });
 
     /**
      * $apply functor - Apply functor to argument list.
      */
-    public static final Functor APPLY = (env, args) -> {
+    public static final FunctorBox APPLY = FunctorBox.box((env, args) -> {
         if (args.length < 2) {
             throw new IllegalArgumentException("$apply requires (functor, arglist) arguments");
         }
@@ -154,23 +154,23 @@ public final class LispFunctors {
         }
 
         return functor.apply(env, ((List<?>) arglist).toArray());
-    };
+    });
 
     /**
      * $eval functor - Evaluate an expression.
      */
-    public static final Functor EVAL = (env, args) -> {
+    public static final FunctorBox EVAL = FunctorBox.box((env, args) -> {
         if (args.length == 0) {
             throw new IllegalArgumentException("$eval requires an expression argument");
         }
 
         return env.eval(args[0]);
-    };
+    });
 
     /**
      * Dictionary of all LISP functors for registration.
      */
-    public static final Map<String, Functor> LISP_FUNCTORS;
+    public static final Map<String, FunctorBox> LISP_FUNCTORS;
 
     static {
         LISP_FUNCTORS = new LinkedHashMap<>();

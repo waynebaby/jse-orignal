@@ -1,3 +1,14 @@
+error id: file://<WORKSPACE>/java/src/main/java/io/github/marchliu/jse/ast/ObjectExpressionNode.java:io/github/marchliu/jse/ast/AstNode#
+file://<WORKSPACE>/java/src/main/java/io/github/marchliu/jse/ast/ObjectExpressionNode.java
+empty definition using pc, found symbol in pc: 
+found definition using semanticdb; symbol io/github/marchliu/jse/ast/AstNode#
+empty definition using fallback
+non-local guesses:
+
+offset: 500
+uri: file://<WORKSPACE>/java/src/main/java/io/github/marchliu/jse/ast/ObjectExpressionNode.java
+text:
+```scala
 package io.github.marchliu.jse.ast;
 
 import io.github.marchliu.jse.Env;
@@ -14,7 +25,7 @@ import java.util.Map;
  * <p>Represents forms like {@code {"$operator": value, "meta": ...}}.
  * Handles the special case for {@code $expr} which evaluates the whole expression.</p>
  */
-public final class ObjectExpressionNode extends AstNode {
+public final class ObjectExpressionNode extends AstNode@@ {
 
     private final String operator;
     private final Object value;
@@ -89,7 +100,6 @@ public final class ObjectExpressionNode extends AstNode {
             args = new Object[]{callEnv.eval(value)};
         }
 
-
         // Call the functor
         if (resolved instanceof Functor functor) {
             return functor.apply(callEnv, args);
@@ -132,3 +142,10 @@ public final class ObjectExpressionNode extends AstNode {
         return "{" + operator + ": " + value + (metadata.isEmpty() ? "" : ", ...") + "}";
     }
 }
+
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: 

@@ -1,3 +1,14 @@
+error id: file://<WORKSPACE>/java/src/main/java/io/github/marchliu/jse/functors/SqlFunctors.java:io/github/marchliu/jse/Env#load#
+file://<WORKSPACE>/java/src/main/java/io/github/marchliu/jse/functors/SqlFunctors.java
+empty definition using pc, found symbol in pc: io/github/marchliu/jse/Env#load#
+found definition using semanticdb; symbol io/github/marchliu/jse/Env#load().
+empty definition using fallback
+non-local guesses:
+
+offset: 3309
+uri: file://<WORKSPACE>/java/src/main/java/io/github/marchliu/jse/functors/SqlFunctors.java
+text:
+```scala
 package io.github.marchliu.jse.functors;
 
 import io.github.marchliu.jse.Env;
@@ -95,7 +106,7 @@ public final class SqlFunctors {
         Env local = new Env((Env) env);
 
         // Load LOCAL operators into local scope
-        local.load(LOCAL_SQL_FUNCTORS);
+        local.loa@@d(LOCAL_SQL_FUNCTORS);
 
         // Parse and evaluate in LOCAL environment
         Parser parser = new Parser(local);
@@ -196,3 +207,10 @@ public final class SqlFunctors {
         SQL_FUNCTORS.put("$query", QUERY);
     }
 }
+
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: io/github/marchliu/jse/Env#load#

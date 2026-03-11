@@ -1,5 +1,8 @@
 package io.github.marchliu.jse;
 
+import java.util.Map;
+import java.util.HashMap;
+
 /**
  * Functional interface for JSE functors (operators).
  *
@@ -17,4 +20,5 @@ public interface Functor {
      * @return Result value
      */
     Object apply(Env env, Object... args);
+
 }

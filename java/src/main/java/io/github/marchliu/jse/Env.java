@@ -125,8 +125,8 @@ public class Env {
      *
      * @param module Map of functor names to functors
      */
-    public void load(Map<String, Functor> module) {
-        for (Map.Entry<String, Functor> entry : module.entrySet()) {
+    public void load(Map<String, ? extends Functor> module) {
+        for (Map.Entry<String, ? extends Functor> entry : module.entrySet()) {
             register(entry.getKey(), entry.getValue());
         }
     }
