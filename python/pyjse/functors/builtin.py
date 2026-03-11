@@ -48,7 +48,9 @@ def _eq(env: 'Env', *args: JseValue) -> JseValue:
     """
     if len(args) != 2:
         raise ValueError("$eq requires exactly 2 arguments")
-    return args[0] == args[1]
+    left = env.eval(args[0]) if hasattr(env, "eval") else args[0]
+    right = env.eval(args[1]) if hasattr(env, "eval") else args[1]
+    return left == right
 
 
 def _cond(env: 'Env', *args: JseValue) -> JseValue:

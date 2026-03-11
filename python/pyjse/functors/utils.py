@@ -217,7 +217,13 @@ def _and(env: 'Env', *args: JseValue) -> JseValue:
         env: Environment
         *args: Arguments to AND
     """
-    return all(args)
+    if not args:
+        return True
+    for arg in args:
+        value = env.eval(arg) if hasattr(env, 'eval') else arg
+        if not bool(value):
+            return False
+    return True
 
 def _or(env: 'Env', *args: JseValue) -> JseValue:
     """Logical OR.
@@ -226,7 +232,13 @@ def _or(env: 'Env', *args: JseValue) -> JseValue:
         env: Environment
         *args: Arguments to OR
     """
-    return any(args)
+    if not args:
+        return False
+    for arg in args:
+        value = env.eval(arg) if hasattr(env, 'eval') else arg
+        if bool(value):
+            return True
+    return False
 
 def _eq(env: 'Env', *args: JseValue) -> JseValue:
     """Logical EQ.
@@ -240,11 +252,12 @@ def _eq(env: 'Env', *args: JseValue) -> JseValue:
         env: Environment
         *args: Arguments to EQ
     """
-    if len(args) == 1:
+    evaluated = [env.eval(a) if hasattr(env, 'eval') else a for a in args]
+    if len(evaluated) == 1:
         return True
-    if len(args) == 2:
-        return args[0] == args[1]
-    return all(args[i] == args[i+1] for i in range(len(args)-1))
+    if len(evaluated) == 2:
+        return evaluated[0] == evaluated[1]
+    return all(evaluated[i] == evaluated[i + 1] for i in range(len(evaluated) - 1))
 
 # Dict of all utility functors for registration
 UTILS_FUNCTORS: dict[str, Functor] = {

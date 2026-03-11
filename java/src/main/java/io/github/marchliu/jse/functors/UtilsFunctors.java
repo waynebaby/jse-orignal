@@ -1,10 +1,8 @@
 package io.github.marchliu.jse.functors;
 
-import io.github.marchliu.jse.Env;
 import io.github.marchliu.jse.Functor;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
