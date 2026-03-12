@@ -7,7 +7,7 @@ Go implementation of JSE (JSON Structural Expression), consistent with the Pytho
 In your `go.mod`:
 
 ```bash
-go get github.com/MarchLiu/jse/gojse@v0.2.1
+go get github.com/MarchLiu/jse/gojse@v0.2.3
 ```
 
 Then import:
@@ -68,14 +68,14 @@ go test ./...
 2. 在仓库根目录打 tag，例如：
 
    ```bash
-   git tag v0.1.0
-   git push origin v0.1.0
+   git tag v0.2.3
+   git push origin v0.2.3
    ```
 
 3. 之后用户即可通过：
 
    ```bash
-   go get github.com/MarchLiu/jse/gojse@v0.1.0
+   go get github.com/MarchLiu/jse/gojse@v0.2.3
    ```
 
    安装该模块，Go 的 proxy（如 `proxy.golang.org`）会自动从 GitHub 抓取代码和版本信息。
