@@ -10,6 +10,7 @@ This document describes all C# tests under `csharp/Jse.Tests`.
   - JSE functional semantics
   - typed operator overload resolution
   - stress and stability scenarios
+  - serializer round-trip correctness
   - known recursion-depth behavior
 
 ## JSON Type Policy In Tests
@@ -28,6 +29,12 @@ dotnet test csharp/Jse.CSharp.sln
 
 ```bash
 dotnet test csharp/Jse.CSharp.sln --filter "FullyQualifiedName~Jse.Tests.JseEngineTests"
+dotnet test csharp/Jse.CSharp.sln --filter "FullyQualifiedName~Jse.Tests.JseStressTests"
+```
+
+### Run stress tests only
+
+```bash
 dotnet test csharp/Jse.CSharp.sln --filter "FullyQualifiedName~Jse.Tests.JseStressTests"
 ```
 
@@ -62,6 +69,14 @@ dotnet test csharp/Jse.CSharp.sln --filter "FullyQualifiedName~Execute_PiApproxi
 
 ## Stress Tests (`JseStressTests`)
 
+All stress tests follow this policy:
+
+1. Execute once with original generated tree and operator settings.
+2. Serialize `JseNode` and `OperatorSettings`.
+3. Deserialize both.
+4. Execute again with deserialized artifacts.
+5. Compare results (or compare expected failure mode).
+
 - `Execute_FactorialDepth10_GeneratedTree_ReturnsExpectedDecimal`
   - Generates a multiply tree and validates exact `10!` as `decimal` (`3628800m`).
 - `Execute_PiApproximation_GeneratedTree_RoundsToFourDecimals`
@@ -76,6 +91,13 @@ dotnet test csharp/Jse.CSharp.sln --filter "FullyQualifiedName~Execute_PiApproxi
   - Validates wide balanced-tree execution (many nodes, low depth).
 - `Execute_DeepChainSum2000_GeneratedTree_KnownStackDepthLimitation` (Skipped)
   - Documents known stack-depth limitation for very deep left-leaning trees.
+
+## Serialization APIs Under Test
+
+- `Jse.Serialization.JseRuntimeSerializer.SerializeNode`
+- `Jse.Serialization.JseRuntimeSerializer.DeserializeNode`
+- `Jse.Serialization.JseRuntimeSerializer.SerializeOperatorSettings`
+- `Jse.Serialization.JseRuntimeSerializer.DeserializeOperatorSettings`
 
 ### Stress Matrix
 
@@ -107,6 +129,7 @@ dotnet test csharp/Jse.CSharp.sln --filter "FullyQualifiedName~Execute_PiApproxi
 
 1. Keep generated trees deterministic (no unseeded randomness).
 2. Use JSON-compatible value types in literals (`decimal`, `bool`, `string`, list/object shapes).
+3. Include serialization round-trip replay in each stress case.
 3. Keep runtime budget reasonable for CI/local runs.
 4. Assert both value correctness and, when relevant, failure mode text.
 5. If a case documents a known limit, mark as `Skip` with a clear reason.
@@ -116,6 +139,8 @@ dotnet test csharp/Jse.CSharp.sln --filter "FullyQualifiedName~Execute_PiApproxi
 - Expression tree is generated in code.
 - Expected value is deterministic.
 - Uses typed operator registrations compatible with scenario.
+- Prefer `RegisterExpression(...)` when the scenario validates operator settings serialization.
+- Includes serializer round-trip replay and validation.
 - No external dependencies introduced.
 - Included in this document under the appropriate section.
 

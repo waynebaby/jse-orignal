@@ -1,14 +1,13 @@
 using System.Text.Json;
 using Jse.Execution;
-using Jse.Parser;
+using Jse.Serialization;
 
 namespace Jse.Runtime;
 
 public sealed class JseEngine
 {
-    private readonly JseParser _parser;
     private readonly ExpressionCompiler _compiler;
-    private readonly OperatorSettings _environment;
+    private readonly OperatorEnvironment _environment;
 
     public JseEngine()
         : this(OperatorRegistry.CreateDefault())
@@ -17,9 +16,8 @@ public sealed class JseEngine
 
     public JseEngine(OperatorRegistry registry)
     {
-        _parser = new JseParser();
         _compiler = new ExpressionCompiler();
-        _environment = new OperatorSettings(registry);
+        _environment = new OperatorEnvironment(registry);
     }
 
     public object? Execute(string json)
@@ -30,7 +28,7 @@ public sealed class JseEngine
 
     public object? Execute(JsonElement element)
     {
-        var ast = _parser.Parse(element);
+        var ast = JseRuntimeSerializer.DeserializeNode(element);
         var executable = _compiler.Compile(ast, _environment);
         return executable();
     }
