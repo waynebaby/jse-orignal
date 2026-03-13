@@ -183,7 +183,8 @@ public static class JseRuntimeSerializer
 
                 writer.WriteEndArray();
 
-                foreach (var kv in call.Meta)
+                var meta = call.Meta ?? new Dictionary<string, object?>();
+                foreach (var kv in meta)
                 {
                     writer.WritePropertyName(kv.Key);
                     WriteValue(writer, kv.Value, new HashSet<object>(ReferenceEqualityComparer.Instance));

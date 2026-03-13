@@ -191,7 +191,7 @@ JSE：
 - **Java**：`jse4j`
 - **Rust**：`jse`
 - **Go**：`github.com/MarchLiu/jse/gojse`
-- **C# (.NET)**：`src/csharp`
+- **C# (.NET)**：`jse-csharp`
 
 #### Python（PyPI）
 
@@ -253,8 +253,21 @@ go get github.com/MarchLiu/jse/gojse@v0.1.0
 * Java 示例与解释器：`java/`
 * Rust 库：`rust/`
 * Go 库：`gojse/`
-* C# 运行时：`src/csharp/`
+* C# 运行时：`csharp/`
 * 后续还可以补充 JSON Schema 与更复杂的 DSL 示例
+
+### 各语言运行时文档
+
+* Python：[python/README.md](python/README.md)
+* TypeScript：[typescript/README.md](typescript/README.md)
+* Java：[java/](java/)
+* Rust：[rust/README.md](rust/README.md)
+* Go：[gojse/README.md](gojse/README.md)
+* C#：[csharp/README.md](csharp/README.md)
+
+### 测试文档
+
+* C#：[csharp/TESTING.md](csharp/TESTING.md)
 
 ---
 

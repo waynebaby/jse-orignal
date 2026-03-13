@@ -1,4 +1,4 @@
-# JSE C# Runtime (`src/csharp`)
+# JSE C# Runtime (`csharp`)
 
 A .NET 8 implementation of JSE using:
 
@@ -26,7 +26,7 @@ var result = engine.Execute("[\"$add\",1,2]");
 ## Notes
 
 - Execution is restricted to registered operators.
-- No reflection/dynamic code generation is used.
+- Runtime dispatch is deterministic and restricted to registered operators and scoped callables.
 - `$quote` returns unevaluated JSON-shaped data.
 - Test catalog and stress scenarios are documented in `TESTING.md`.
 
@@ -40,13 +40,13 @@ var result = engine.Execute("[\"$add\",1,2]");
 - Compiler supports `Compile<T>` for typed delegate generation; `JseEngine.Execute` remains `object?` at the API boundary.
 - Operator registry uses typed bindings and overload resolution by argument types.
 - Operator registration accepts both specific and general signatures (including `object`/`object?`), and runtime selects the most specific applicable overload.
-- Operator registration also supports `Expression<Func<...>>` via `RegisterExpression(...)` for serializable operator definitions.
+- Operator registration supports `Expression<Func<...>>` via `RegisterExpression(...)` and also includes special/variadic registration APIs.
 
 ## Serialization Support
 
 - `Jse.Serialization.JseRuntimeSerializer` supports round-trip serialization for:
 	- `JseNode` AST (`SerializeNode` / `DeserializeNode`)
-	- `OperatorSettings` (`SerializeOperatorSettings` / `DeserializeOperatorSettings`)
+	- `OperatorEnvironment` (`SerializeOperatorSettings` / `DeserializeOperatorSettings`)
 - Serialized AST and runtime settings can be loaded back and executed by the compiler/engine.
 - Operator settings serialization prefers expression-backed operators and stores detailed `JseCsharpOperators` expression nodes in a separate JSON section.
-- Method-backed operators are supported as a fallback only when the delegate target is static.
+- Non-expression operator bindings are intentionally rejected by serializer to keep replay deterministic.

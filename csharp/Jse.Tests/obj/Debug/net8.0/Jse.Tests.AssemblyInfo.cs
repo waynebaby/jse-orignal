@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Jse.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c28bd06b0282ec4b7630e68efc0aceb7100185b4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+414ad17a118f861a484a03734aafc4711a557c0e")]
 [assembly: System.Reflection.AssemblyProductAttribute("Jse.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Jse.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

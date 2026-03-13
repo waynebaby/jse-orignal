@@ -66,13 +66,37 @@ dotnet test csharp/Jse.CSharp.sln --filter "FullyQualifiedName~Execute_PiApproxi
   - Verifies `$$` escape semantics.
 - `Execute_WithJsonElementInput_Works`
   - Verifies `JsonElement` execution path.
+- `Execute_ListBuiltinFunctors_WorkAsExpected`
+  - Verifies list-oriented builtins (`head`/`tail`/`cons`).
+- `Execute_TypePredicateFunctors_WorkAsExpected`
+  - Verifies predicate builtins (`atom?`/`list?`/`map?`/`null?`).
+- `Execute_CollectionOps_WorkAsExpected`
+  - Verifies `get`/`set`/`del` over map/list values.
+- `Execute_LogicAndEqFunctors_WorkAsExpected`
+  - Verifies fixed-arity and variadic logical/equality behavior.
+- `Execute_Def_StoresSymbolInGlobalScope`
+  - Verifies global scope symbol definition behavior.
+- `Execute_DefnAndLambda_InvokeWithLexicalBinding`
+  - Verifies function definition and lexical binding semantics.
+- `Execute_ApplyAndEval_WorkAsExpected`
+  - Verifies `$apply` and `$eval` execution paths.
+- `Execute_VariadicEqAndOr_WorkAsExpected`
+  - Verifies variadic dispatch through runtime evaluator.
+- `Execute_Cond_MultiBranchAndLazyEvaluation_WorkAsExpected`
+  - Verifies conditional multi-branch behavior and lazy branch eval.
+- `Execute_Query_BuildsSqlFromSinglePattern`
+  - Verifies SQL plan generation for a single pattern query.
+- `Execute_Query_BuildsSqlFromAndPatterns`
+  - Verifies SQL plan generation for composed `and` patterns.
+- `SqlQueryPlan_ToSqlCommand_BindsParametersBySqlDbType`
+  - Verifies SQL parameter binding type and payload integrity.
 
 ## Stress Tests (`JseStressTests`)
 
 All stress tests follow this policy:
 
 1. Execute once with original generated tree and operator settings.
-2. Serialize `JseNode` and `OperatorSettings`.
+2. Serialize `JseNode` and `OperatorEnvironment`.
 3. Deserialize both.
 4. Execute again with deserialized artifacts.
 5. Compare results (or compare expected failure mode).
@@ -89,6 +113,8 @@ All stress tests follow this policy:
   - Validates delegate cache reuse for equivalent AST + target type.
 - `Execute_WideBalancedSum1024_GeneratedTree_ReturnsExpected`
   - Validates wide balanced-tree execution (many nodes, low depth).
+- `Serialize_ExpressionBackedOperators_ContainsDetailedVisitorNodes`
+  - Verifies expression visitor output (`JseCsharpOperators` nodes) exists in serialized runtime settings and remains executable after reload.
 - `Execute_DeepChainSum2000_GeneratedTree_KnownStackDepthLimitation` (Skipped)
   - Documents known stack-depth limitation for very deep left-leaning trees.
 
@@ -96,8 +122,8 @@ All stress tests follow this policy:
 
 - `Jse.Serialization.JseRuntimeSerializer.SerializeNode`
 - `Jse.Serialization.JseRuntimeSerializer.DeserializeNode`
-- `Jse.Serialization.JseRuntimeSerializer.SerializeOperatorSettings`
-- `Jse.Serialization.JseRuntimeSerializer.DeserializeOperatorSettings`
+- `Jse.Serialization.JseRuntimeSerializer.SerializeOperatorSettings` (`OperatorEnvironment` input)
+- `Jse.Serialization.JseRuntimeSerializer.DeserializeOperatorSettings` (`OperatorEnvironment` output)
 
 ### Stress Matrix
 
@@ -130,9 +156,9 @@ All stress tests follow this policy:
 1. Keep generated trees deterministic (no unseeded randomness).
 2. Use JSON-compatible value types in literals (`decimal`, `bool`, `string`, list/object shapes).
 3. Include serialization round-trip replay in each stress case.
-3. Keep runtime budget reasonable for CI/local runs.
-4. Assert both value correctness and, when relevant, failure mode text.
-5. If a case documents a known limit, mark as `Skip` with a clear reason.
+4. Keep runtime budget reasonable for CI/local runs.
+5. Assert both value correctness and, when relevant, failure mode text.
+6. If a case documents a known limit, mark as `Skip` with a clear reason.
 
 ### Checklist For New Tests
 
