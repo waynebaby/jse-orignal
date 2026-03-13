@@ -191,6 +191,7 @@ JSE：
 - **Java**：`jse4j`
 - **Rust**：`jse`
 - **Go**：`github.com/MarchLiu/jse/gojse`
+- **C# (.NET)**：`src/csharp`
 
 #### Python（PyPI）
 
@@ -252,6 +253,7 @@ go get github.com/MarchLiu/jse/gojse@v0.1.0
 * Java 示例与解释器：`java/`
 * Rust 库：`rust/`
 * Go 库：`gojse/`
+* C# 运行时：`src/csharp/`
 * 后续还可以补充 JSON Schema 与更复杂的 DSL 示例
 
 ---
