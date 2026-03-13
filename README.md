@@ -191,6 +191,7 @@ Implementations are available in several languages:
 - **Java**: `jse4j`
 - **Rust**: `jse`
 - **Go**: `github.com/MarchLiu/jse/gojse`
+- **C# (.NET)**: `src/csharp`
 
 #### Python (PyPI)
 
@@ -249,6 +250,7 @@ This repository includes:
 - TypeScript examples and interpreter: `typescript/`
 - Java examples and interpreter: `java/`
 - Rust library: `rust/`
+- C# runtime: `src/csharp/`
 - Further additions (e.g. JSON Schema, more complex DSL examples) may follow
 
 ---
