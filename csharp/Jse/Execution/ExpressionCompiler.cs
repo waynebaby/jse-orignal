@@ -2,38 +2,69 @@ using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using Jse.Ast;
 using Jse.Runtime;
+ 
 
 namespace Jse.Execution;
 
 public sealed class ExpressionCompiler
 {
-    private readonly ConcurrentDictionary<string, Func<object?>> _cache = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, Delegate> _cache = new(StringComparer.Ordinal);
 
-    public Func<object?> Compile(JseNode ast, Environment env)
+    public Func<object?> Compile(JseNode ast, OperatorSettings settings)
     {
-        var key = BuildCacheKey(ast);
-        return _cache.GetOrAdd(key, _ => BuildDelegate(ast, env));
+        return Compile<object?>(ast, settings);
     }
 
-    private static Func<object?> BuildDelegate(JseNode ast, Environment env)
+    public Func<T> Compile<T>(JseNode ast, OperatorSettings settings)
     {
-        var body = BuildExpression(ast, env);
-        var lambda = Expression.Lambda<Func<object?>>(Expression.Convert(body, typeof(object)));
+        var key = $"{typeof(T).FullName}:{BuildCacheKey(ast)}";
+        return (Func<T>)_cache.GetOrAdd(key, _ => BuildDelegate<T>(ast, settings));
+    }
+
+    private static Func<T> BuildDelegate<T>(JseNode ast, OperatorSettings settings)
+    {
+        var body = BuildExpression(ast, settings);
+        var lambda = Expression.Lambda<Func<T>>(ConvertIfNeeded(body, typeof(T)));
         return lambda.Compile();
     }
 
-    private static Expression BuildExpression(JseNode node, Environment env)
+    private static Expression ConvertIfNeeded(Expression expression, Type targetType)
+    {
+        if (expression.Type == targetType)
+        {
+            return expression;
+        }
+
+        if (targetType.IsAssignableFrom(expression.Type) && !expression.Type.IsValueType)
+        {
+            return expression;
+        }
+
+        return Expression.Convert(expression, targetType);
+    }
+
+    private static Expression BuildExpression(JseNode node, OperatorSettings settings)
     {
         return node switch
         {
-            JseLiteral literal => Expression.Constant(literal.Value, typeof(object)),
-            JseSymbol symbol => Expression.Constant($"${symbol.Name}", typeof(object)),
-            JseCall call => BuildCall(call, env),
+            JseLiteral literal => BuildLiteralExpression(literal.Value),
+            JseSymbol symbol => Expression.Constant($"${symbol.Name}"),
+            JseCall call => BuildCall(call, settings),
             _ => throw new InvalidOperationException($"Unsupported AST node: {node.GetType().Name}")
         };
     }
 
-    private static Expression BuildCall(JseCall call, Environment env)
+    private static Expression BuildLiteralExpression(object? value)
+    {
+        if (value is null)
+        {
+            return Expression.Constant(null, typeof(object));
+        }
+
+        return Expression.Constant(value, value.GetType());
+    }
+
+    private static Expression BuildCall(JseCall call, OperatorSettings settings)
     {
         if (string.Equals(call.Operator, "quote", StringComparison.Ordinal))
         {
@@ -43,16 +74,21 @@ public sealed class ExpressionCompiler
             }
 
             var quoted = QuoteNode(call.Args[0]);
-            return Expression.Constant(quoted, typeof(object));
+            return BuildLiteralExpression(quoted);
         }
 
-        var op = env.Operators.Resolve(call.Operator);
         var args = call.Args
-            .Select(arg => Expression.Convert(BuildExpression(arg, env), typeof(object)))
+            .Select(arg => BuildExpression(arg, settings))
             .ToArray();
 
-        var arrayExpr = Expression.NewArrayInit(typeof(object), args);
-        return Expression.Invoke(Expression.Constant(op), arrayExpr);
+        var argTypes = args.Select(static x => x.Type).ToArray();
+        var binding = settings.Operators.Resolve(call.Operator, argTypes);
+        var convertedArgs = args
+            .Select((arg, i) => ConvertIfNeeded(arg, binding.ParameterTypes[i]))
+            .ToArray();
+
+        var opExpr = Expression.Constant(binding.Implementation, binding.Implementation.GetType());
+        return Expression.Invoke(opExpr, convertedArgs);
     }
 
     private static object? QuoteNode(JseNode node)

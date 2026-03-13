@@ -1,0 +1,14 @@
+# .NET / Visual Studio
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+*.pdb
+*.cache
+*.nupkg
+*.snupkg
+TestResults/

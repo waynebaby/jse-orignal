@@ -8,7 +8,7 @@ public sealed class JseEngine
 {
     private readonly JseParser _parser;
     private readonly ExpressionCompiler _compiler;
-    private readonly Environment _environment;
+    private readonly OperatorSettings _environment;
 
     public JseEngine()
         : this(OperatorRegistry.CreateDefault())
@@ -19,7 +19,7 @@ public sealed class JseEngine
     {
         _parser = new JseParser();
         _compiler = new ExpressionCompiler();
-        _environment = new Environment(registry);
+        _environment = new OperatorSettings(registry);
     }
 
     public object? Execute(string json)

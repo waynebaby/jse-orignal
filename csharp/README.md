@@ -28,3 +28,15 @@ var result = engine.Execute("[\"$add\",1,2]");
 - Execution is restricted to registered operators.
 - No reflection/dynamic code generation is used.
 - `$quote` returns unevaluated JSON-shaped data.
+- Test catalog and stress scenarios are documented in `TESTING.md`.
+
+## C# Specific Semantics
+
+- JSON values are mapped by `JsonHelpers` as:
+	- number -> `decimal`
+	- array -> `List<object?>`
+	- object -> `Dictionary<string, object?>`
+- Parser exposes reusable JSON configuration via `JseParser.SerializerOptions` and `JseParser.NodeConverter`.
+- Compiler supports `Compile<T>` for typed delegate generation; `JseEngine.Execute` remains `object?` at the API boundary.
+- Operator registry uses typed bindings and overload resolution by argument types.
+- Operator registration accepts both specific and general signatures (including `object`/`object?`), and runtime selects the most specific applicable overload.

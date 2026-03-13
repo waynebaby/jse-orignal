@@ -1,8 +1,8 @@
 namespace Jse.Runtime;
 
-public sealed class Environment
+public sealed class OperatorSettings
 {
-    public Environment(OperatorRegistry operators)
+    public OperatorSettings(OperatorRegistry operators)
     {
         Operators = operators;
     }
